@@ -53,6 +53,14 @@ class _HomepageState extends State<Homepage> {
       }
     }
 
+    void mode(){
+      if(isInt){
+        totalValue = (int.parse(totalValue) % int.parse(tempNumber)).toString();
+      }else{
+        totalValue = (double.parse(totalValue) % double.parse(tempNumber)).toString();
+      }
+    }
+
     void division(){
       if(tempNumber != "0"){
         if(isInt){
@@ -83,22 +91,51 @@ class _HomepageState extends State<Homepage> {
         case 4:
           multiplication();
           break;
+        case 5:
+          mode();
+          break;
       }
       tempNumber = "0";
     }
 
     void startMath(int operationType){
-      isMathButtonClicked = true;
-      mathStatus = operationType;
-      if(totalValue == "0"){
-        totalValue = tempNumber;
-        printedNumber = tempNumber;
+      if(!isInt && tempNumber.indexOf(".")+1 == tempNumber.length){
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text("Sayıyı doğru giriniz",style: TextStyle(
+                  color: Colors.indigoAccent
+              ),),
+              backgroundColor: Colors.white,
+              action: SnackBarAction(
+                label: "Tekrar dene",
+                textColor: Colors.indigoAccent,
+                onPressed: (){},
+              ),
+            )
+        );
       }else{
-        makeMathOperation();
-        printedNumber = totalValue;
+        isMathButtonClicked = true;
+        mathStatus = operationType;
+        if(totalValue == "0"){
+          totalValue = tempNumber;
+          printedNumber = tempNumber;
+        }else{
+          makeMathOperation();
+          printedNumber = totalValue;
+        }
       }
     }
 
+    void changeNumberSign(){
+      if(tempNumber != "0") {
+        if(isInt){
+          tempNumber = (int.parse(tempNumber) * -1).toString();
+        }else{
+          tempNumber = (double.parse(tempNumber) * -1.0).toString();
+        }
+      }
+      printedNumber = tempNumber;
+    }
     void equalMath(){
       startMath(mathStatus);
       printedNumber = totalValue;
@@ -108,6 +145,9 @@ class _HomepageState extends State<Homepage> {
       tempNumber = "0";
       totalValue = "0";
       printedNumber = "0";
+      isMathButtonClicked = false;
+      isInt = true;
+      mathStatus = 0;
     }
 
     void addNumber(String number){
@@ -147,10 +187,10 @@ class _HomepageState extends State<Homepage> {
                     setState((){clear();});
                   }, text: "AC",buttonColor: Colors.grey,buttonWidth: 1.0,),
                   CustomButton(onTap: (String value){
-                    print(value);
+                    setState((){changeNumberSign();});
                   }, text: "+/-",buttonColor: Colors.grey,buttonWidth: 1.0,),
                   CustomButton(onTap: (String value){
-                    print(value);
+                    setState((){startMath(5);});
                   }, text: "%",buttonColor: Colors.grey,buttonWidth: 1.0,),
                   CustomButton(onTap: (String value){
                     setState((){startMath(3);});
@@ -215,7 +255,11 @@ class _HomepageState extends State<Homepage> {
                     setState((){addNumber("0");});
                   }, text: "0",buttonColor: Colors.black12,buttonWidth: 2.4,),
                   CustomButton(onTap: (String value){
-                    setState((){isInt = false;});
+                    setState((){
+                      isInt = false;
+                      tempNumber += ".";
+                      printedNumber += ".";
+                    });
                   }, text: ",",buttonColor: Colors.black12,buttonWidth: 1.0,),
                   CustomButton(onTap: (String value){
                     setState((){equalMath();});
